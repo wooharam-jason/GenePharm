@@ -1,0 +1,843 @@
+<!-- ... existing code ... -->
+<!DOCTYPE html>
+<html lang="id" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenePharm Explorer | Pharmacogenomics Platform</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            900: '#0c4a6e',
+                        },
+                        medical: {
+                            bg: '#090d16',
+                            card: '#111827',
+                            border: '#1f293d',
+                            accent: '#06b6d4',
+                            emerald: '#10b981',
+                            amber: '#f59e0b',
+                            rose: '#f43f5e'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #090d16; }
+        ::-webkit-scrollbar-thumb { background: #1f293d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+        
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(31, 41, 61, 0.8);
+        }
+
+        .active-card {
+            border-color: #06b6d4 !important;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+        }
+    </style>
+</head>
+<body class="h-full font-sans antialiased bg-medical-bg text-slate-200 selection:bg-medical-accent selection:text-black">
+
+    <!-- Header Navigation -->
+    <header class="border-b border-medical-border bg-medical-bg/90 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-cyan-600 to-emerald-500 flex items-center justify-center font-bold text-black font-display text-lg shadow-md shadow-cyan-500/20">
+                    G
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-base text-white tracking-tight flex items-center gap-2">
+                        GenePharm <span class="text-xs px-2 py-0.5 rounded font-mono font-medium bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Disease-Gene Detector</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 font-mono">Deteksi Gen Penyebab Penyakit & Farmakogenomik</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    Database Penyakit & Gen Aktif
+                </span>
+                <button onclick="exportReport()" class="text-xs bg-slate-800 hover:bg-slate-700 text-white font-medium px-3 py-1.5 rounded-lg border border-medical-border transition flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 000-4h-6a2 2 0 000 4zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Cetak Laporan
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Top Controls: Big Disease Search Bar -->
+        <div class="glass-panel rounded-xl p-5 space-y-4 border-l-4 border-l-cyan-500">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+                <div>
+                    <h2 class="text-base font-display font-bold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        Cari Penyakit untuk Deteksi Gen Penyebab
+                    </h2>
+                    <p class="text-xs text-slate-400">Ketik nama penyakit (contoh: Kanker Payudara, Cystic Fibrosis, Thalassemia, Diabetes, Resistensi Clopidogrel) untuk melihat gen yang bermasalah.</p>
+                </div>
+                <button onclick="toggleAddDiseaseModal()" class="text-xs bg-cyan-600 hover:bg-cyan-500 text-black font-bold px-3 py-2 rounded-lg transition flex items-center gap-1.5 self-stretch md:self-auto justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    + Tambah Input Penyakit Baru
+                </button>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-3 items-center">
+                <div class="relative w-full">
+                    <input type="text" id="searchInput" onkeyup="filterDiseases()" placeholder="Ketik nama penyakit di sini... (misal: Thalassemia, Kanker, Diabetes, Hiperkolesterolemia)" 
+                        class="w-full bg-slate-900 border-2 border-cyan-500/50 rounded-lg pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition shadow-inner">
+                    <svg class="w-5 h-5 text-cyan-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+
+                <!-- Category Pills -->
+                <div class="flex flex-wrap items-center gap-1.5 text-xs w-full md:w-auto shrink-0">
+                    <button onclick="setCategoryFilter('all')" class="cat-pill active px-3 py-2 rounded-md bg-medical-accent text-slate-950 font-semibold text-xs transition">Semua</button>
+                    <button onclick="setCategoryFilter('Onkologi')" class="cat-pill px-3 py-2 rounded-md bg-slate-800 text-slate-300 hover:text-white border border-medical-border text-xs transition">Onkologi</button>
+                    <button onclick="setCategoryFilter('Kardiologi')" class="cat-pill px-3 py-2 rounded-md bg-slate-800 text-slate-300 hover:text-white border border-medical-border text-xs transition">Kardiologi</button>
+                    <button onclick="setCategoryFilter('Genetik/Langka')" class="cat-pill px-3 py-2 rounded-md bg-slate-800 text-slate-300 hover:text-white border border-medical-border text-xs transition">Genetik Langka</button>
+                    <button onclick="setCategoryFilter('Metabolik')" class="cat-pill px-3 py-2 rounded-md bg-slate-800 text-slate-300 hover:text-white border border-medical-border text-xs transition">Metabolik</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Add New Disease Input -->
+        <div id="addModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="glass-panel w-full max-w-lg rounded-xl p-6 border border-cyan-500/30 space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <h3 class="text-sm font-bold text-white font-display flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                        Input Penyakit & Gen Penyebab Baru
+                    </h3>
+                    <button onclick="toggleAddDiseaseModal()" class="text-slate-400 hover:text-white">✕</button>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="block text-slate-300 mb-1 font-mono">Nama Penyakit / Kondisi *</label>
+                        <input type="text" id="inpDisease" placeholder="Contoh: Thalassemia Beta, Alzheimer, Duchenne Muscular Dystrophy" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-slate-300 mb-1 font-mono">Simbol Gen Penyebab *</label>
+                            <input type="text" id="inpSymbol" placeholder="Contoh: HBB, MAPT, DMD" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 mb-1 font-mono">Kategori *</label>
+                            <select id="inpCategory" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white">
+                                <option value="Genetik/Langka">Genetik/Langka</option>
+                                <option value="Onkologi">Onkologi</option>
+                                <option value="Kardiologi">Kardiologi</option>
+                                <option value="Metabolik">Metabolik</option>
+                                <option value="Infeksi/Sistemik">Infeksi/Sistemik</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-slate-300 mb-1 font-mono">Lokus Kromosom</label>
+                            <input type="text" id="inpLocus" placeholder="Contoh: 11p15.4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 mb-1 font-mono">Obat Terkait / Terapi</label>
+                            <input type="text" id="inpDrug" placeholder="Contoh: Deferasirox, Hydroxyurea" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-1 font-mono">Mekanisme Patofisiologi Genetik</label>
+                        <textarea id="inpMechanism" rows="3" placeholder="Jelaskan mengapa mutasi gen ini menyebabkan penyakit tersebut..." class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-white"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                    <button onclick="toggleAddDiseaseModal()" class="px-3 py-1.5 rounded bg-slate-800 text-slate-300 text-xs">Batal</button>
+                    <button onclick="submitNewDisease()" class="px-4 py-1.5 rounded bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-xs">Simpan Data Penyakit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid Layout: Left Disease List & Right Gene & Drug Details -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left Side: Disease List Header -->
+            <div class="lg:col-span-4 space-y-3">
+                <div class="flex items-center justify-between text-xs text-slate-400 font-mono px-1">
+                    <span>DAFTAR PENYAKIT (<span id="diseaseCount">0</span>)</span>
+                    <span>Klik Penyakit untuk Deteksi</span>
+                </div>
+                <div class="space-y-3 max-h-[750px] overflow-y-auto pr-1" id="diseaseGrid">
+                    <!-- Dynamic disease cards will be injected here -->
+                </div>
+            </div>
+
+            <!-- Right Side: Gene Detection Workstation -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <!-- 1. Detected Gene Result Header -->
+                <div class="glass-panel rounded-xl p-5 border-l-4 border-l-cyan-400 relative overflow-hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 uppercase">GEN PENYEBAB TERDETEKSI</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20" id="detCategory">Kardiologi</span>
+                            </div>
+                            <h2 class="text-2xl font-display font-bold text-cyan-300 tracking-tight" id="detSymbol">CYP2C19</h2>
+                            <p class="text-xs text-slate-400 mt-0.5" id="detName">Cytochrome P450 Family 2 Subfamily C Member 19</p>
+                        </div>
+                        <div class="bg-slate-900/80 px-4 py-2.5 rounded-lg border border-medical-border text-right min-w-[160px]">
+                            <span class="text-[10px] font-mono uppercase text-slate-400 block">Lokus Kromosom</span>
+                            <span class="text-sm font-mono font-bold text-cyan-400" id="detLocus">10q24.2</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-medical-border/60 text-xs">
+                        <div class="bg-slate-900/90 p-3 rounded-lg border border-cyan-500/20">
+                            <span class="text-cyan-400 block mb-0.5 font-bold font-mono uppercase text-[10px]">Penyakit yang Diperiksa:</span>
+                            <p class="text-white font-bold text-sm" id="detDisease">Resistensi Clopidogrel & Antiplatelet</p>
+                        </div>
+                        <div class="bg-slate-900/90 p-3 rounded-lg border border-emerald-500/20">
+                            <span class="text-emerald-400 block mb-0.5 font-bold font-mono uppercase text-[10px]">Obat & Terapi Terkait:</span>
+                            <p class="text-emerald-300 font-mono font-semibold text-xs" id="detDrugs">Clopidogrel, Prasugrel, Ticagrelor</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Dual Panel: 2D Skeletal Chemical Structure & CPIC Response Chart -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- Molecular 2D Skeletal Canvas Viewer -->
+                    <div class="glass-panel rounded-xl p-4 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                                <h3 class="text-xs font-bold text-white uppercase font-mono" id="molTitle">Struktur 2D Senyawa Obat</h3>
+                            </div>
+                            <span class="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded">Skeletal Formula</span>
+                        </div>
+
+                        <!-- Canvas Area -->
+                        <div class="w-full h-52 bg-slate-950 rounded-lg border border-medical-border relative overflow-hidden flex items-center justify-center">
+                            <canvas id="molCanvas" class="w-full h-full"></canvas>
+                            <div class="absolute bottom-2 left-2 bg-slate-900/90 text-[10px] font-mono px-2 py-0.5 rounded border border-slate-700 text-slate-300">
+                                Visualisasi Struktur 2D Farmasi Presisi
+                            </div>
+                        </div>
+
+                        <!-- Molecular Details Grid -->
+                        <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-medical-border/60 text-[11px] font-mono">
+                            <div class="bg-slate-900 p-2 rounded border border-medical-border">
+                                <span class="text-slate-500 block text-[9px]">Formula / MW</span>
+                                <span class="text-slate-200 font-bold block truncate" id="molMW">308.33 g/mol</span>
+                            </div>
+                            <div class="bg-slate-900 p-2 rounded border border-medical-border">
+                                <span class="text-slate-500 block text-[9px]">LogP (Lipofilitas)</span>
+                                <span class="text-cyan-400 font-bold" id="molLogP">2.7</span>
+                            </div>
+                            <div class="bg-slate-900 p-2 rounded border border-medical-border">
+                                <span class="text-slate-500 block text-[9px]">H-Bond Donor/Acc</span>
+                                <span class="text-emerald-400 font-bold" id="molHBD">1 / 4</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dose Adjustment Chart -->
+                    <div class="glass-panel rounded-xl p-4 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+                                <h3 class="text-xs font-bold text-white uppercase font-mono">Respons Dosis Terhitung (%)</h3>
+                            </div>
+                            <span class="text-[10px] font-mono text-slate-400">CPIC Clinical Guide</span>
+                        </div>
+
+                        <div class="w-full h-48 relative">
+                            <canvas id="doseChart"></canvas>
+                        </div>
+
+                        <div class="mt-3 pt-2 border-t border-medical-border/60 text-[11px] text-slate-400">
+                            Grafik efektivitas/efek terapi obat berdasarkan variasi mutasi genotipe pasien.
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 3. Key Variants & Pathophysiology Mechanism Section -->
+                <div class="glass-panel rounded-xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold uppercase font-mono text-cyan-400 tracking-wider flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1.207 1.207 0 01.83.352l4.414 4.414a1.207 1.207 0 01.352.83V19a2 2 0 01-2 2z"></path></svg>
+                        Mekanisme Patofisiologi Mutasi Genetik & Varian Utama
+                    </h3>
+
+                    <p class="text-xs text-slate-300 leading-relaxed bg-slate-900/60 p-3.5 rounded-lg border border-medical-border" id="detMechanism">
+                        CYP2C19 mengatalisis bioaktivasi prodrug Clopidogrel menjadi bentuk metabolit tiol aktif. Varian alel non-fungsional menurunkan kadar metabolit aktif secara drastis dalam darah.
+                    </p>
+
+                    <!-- Variants Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs font-mono">
+                            <thead>
+                                <tr class="border-b border-medical-border text-slate-400 bg-slate-900/80">
+                                    <th class="p-2.5 rounded-l-lg">Variant rsID</th>
+                                    <th class="p-2.5">Perubahan Noktah</th>
+                                    <th class="p-2.5">Dampak Enzim/Protein</th>
+                                    <th class="p-2.5 rounded-r-lg">Klasifikasi Risiko</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detVariantsTable">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 4. CPIC Dosing Recommendation Box -->
+                <div class="glass-panel rounded-xl p-5 border border-emerald-500/30 bg-emerald-950/10 space-y-2">
+                    <div class="flex items-center gap-2 text-emerald-400 font-mono text-xs font-bold uppercase">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Rekomendasi Terapi & Preskripsi Farmasi
+                    </div>
+                    <p class="text-xs text-slate-200 leading-relaxed font-sans" id="detDosingGuide">
+                        Pasien Poor Metabolizer direkomendasikan mengganti Clopidogrel ke antiplatelet generasi baru seperti Prasugrel (10mg/hari) atau Ticagrelor (90mg BID) untuk mencegah kegagalan terapi.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Data Script -->
+    <script>
+        // Expanded Disease Database centered on Disease -> Gen Cause mapping
+        const diseaseDatabase = [
+            {
+                id: 'brca1',
+                disease: 'Kanker Payudara & Ovarium Herediter',
+                symbol: 'BRCA1 / BRCA2',
+                name: 'BRCA1 DNA Repair Associated',
+                category: 'Onkologi',
+                locus: '17q21.31 & 13q13.1',
+                inheritance: 'Autosomal Dominan',
+                evidence: 'NCCN / CPIC Level A',
+                primaryDrug: 'Olaparib, Talazoparib, Cisplatin',
+                mechanism: 'Mutasi germline pada gen BRCA1/BRCA2 menyebabkan kegagalan mekanisme perbaikan untai ganda DNA (Homologous Recombination Repair), memicu akumulasi mutasi seluler yang memicu kanker payudara dan ovarium.',
+                variants: [
+                    { rsid: 'rs80357906', change: 'c.68_69delAG', effect: 'Frameshift / Protein Truncation', risk: 'Pathogenic High Risk' },
+                    { rsid: 'rs80357711', change: 'c.5266dupC', effect: 'Loss of Function DNA Repair', risk: 'Pathogenic High Risk' }
+                ],
+                dosingGuide: 'Pasien dengan mutasi BRCA1/2 sangat responsif terhadap inhibitor PARP seperti Olaparib (300 mg 2x sehari) karena mekanisme Synthetic Lethality.',
+                chartLabels: ['Wild-type (Tanpa Mutasi)', 'Heterozigot Mutation', 'Biallelic Defective'],
+                chartData: [100, 30, 5]
+            },
+            {
+                id: 'cftr',
+                disease: 'Sistisk Fibrosis (Cystic Fibrosis)',
+                symbol: 'CFTR',
+                name: 'Cystic Fibrosis Transmembrane Conductance Regulator',
+                category: 'Genetik/Langka',
+                locus: '7q31.2',
+                inheritance: 'Autosomal Resesif',
+                evidence: 'CPIC Level A',
+                primaryDrug: 'Ivacaftor, Lumacaftor, Elexacaftor',
+                mechanism: 'Disfungsi atau hilangnya protein saluran klorida CFTR menyebabkan sekresi mukus kental berlebih di paru-paru dan pankreas, memicu infeksi paru kronis.',
+                variants: [
+                    { rsid: 'rs113993960', change: 'c.1521_1523delCTT (F508del)', effect: 'Misfolding Protein CFTR', risk: 'Klasik CF Berat' },
+                    { rsid: 'rs75527207', change: 'c.1652G>A (G551D)', effect: 'Gating Defect Saluran Klorida', risk: 'Pathogenic' }
+                ],
+                dosingGuide: 'Ivacaftor direkomendasikan spesifik untuk mutasi G551D (potensiator saluran), sedangkan pembawa F508del memerlukan kombinasi Elexacaftor/Tezacaftor/Ivacaftor.',
+                chartLabels: ['Fungsi Saluran Normal', 'G551D (Dengan Ivacaftor)', 'F508del (Tanpa Terapi)'],
+                chartData: [100, 75, 10]
+            },
+            {
+                id: 'clopidogrel',
+                disease: 'Resistensi Clopidogrel & Antiplatelet',
+                symbol: 'CYP2C19',
+                name: 'Cytochrome P450 Family 2 Subfamily C Member 19',
+                category: 'Kardiologi',
+                locus: '10q24.2',
+                inheritance: 'Autosomal Kodominan',
+                evidence: 'CPIC Level A',
+                primaryDrug: 'Clopidogrel, Prasugrel, Ticagrelor',
+                mechanism: 'CYP2C19 mengatalisis bioaktivasi prodrug Clopidogrel menjadi metabolit tiol aktif. Alel loss-of-function (CYP2C19 Alel 2 dan Alel 3) memblokir pembentukan metabolit aktif sehingga meningkatkan risiko thrombosis stent.',
+                variants: [
+                    { rsid: 'rs4244285', change: 'c.681G>A (CYP2C19 Alel 2)', effect: 'Loss of function / Defek Splicing', risk: 'Risiko Tinggi Trombosis' },
+                    { rsid: 'rs4986893', change: 'c.636G>A (CYP2C19 Alel 3)', effect: 'Stop Codon / Inaktif Total', risk: 'Poor Metabolizer' }
+                ],
+                dosingGuide: 'Pasien Intermediate atau Poor Metabolizer diprioritaskan untuk menggunakan agen antiplatelet alternatif seperti Prasugrel (10 mg/hari) atau Ticagrelor (90 mg 2x sehari).',
+                chartLabels: ['Normal (Alel 1/Alel 1)', 'Intermediate (Alel 1/Alel 2)', 'Poor (Alel 2/Alel 2)'],
+                chartData: [100, 45, 10]
+            },
+            {
+                id: 'warfarin',
+                disease: 'Sensitivitas Dosis Warfarin & Pendarahan',
+                symbol: 'VKORC1 / CYP2C9',
+                name: 'Vitamin K Epoxide Reductase / CYP2C9',
+                category: 'Kardiologi',
+                locus: '16p11.2 & 10q23.33',
+                inheritance: 'Autosomal Kodominan',
+                evidence: 'CPIC Level A',
+                primaryDrug: 'Warfarin, Acenocoumarol',
+                mechanism: 'Gen VKORC1 mengode enzim target antikoagulan Warfarin. Mutasi promotor -1639G>A menurunkan ekspresi enzim, sementara varian CYP2C9 memperlambat klirens obat.',
+                variants: [
+                    { rsid: 'rs9923231', change: '-1639G>A (Promotor)', effect: 'Penurunan Ekspresi Enzim Target', risk: 'Risiko Perdarahan Tinggi' },
+                    { rsid: 'rs1799853', change: 'Arg144Cys (CYP2C9 Alel 2)', effect: 'Penurunan Klirens Obat', risk: 'Sensitivitas Sedang' }
+                ],
+                dosingGuide: 'Pasien dengan genotipe VKORC1 -1639 A/A memerlukan penurunan dosis awal Warfarin sebesar 30% hingga 50% dibanding dosis standar.',
+                chartLabels: ['Dosis Standar', 'Intermediate (A/G)', 'Sensitif Tinggi (A/A)'],
+                chartData: [100, 55, 25]
+            },
+            {
+                id: 'dpyd',
+                disease: 'Toksisitas Fatal Fluoropyrimidine (5-FU)',
+                symbol: 'DPYD',
+                name: 'Dihydropyrimidine Dehydrogenase',
+                category: 'Onkologi',
+                locus: '1p21.3',
+                inheritance: 'Autosomal Resesif',
+                evidence: 'CPIC / DPWG Level A',
+                primaryDrug: '5-Fluorouracil (5-FU), Capecitabine',
+                mechanism: 'Enzim DPD mengeliminasi >80% dosis 5-FU. Varian inaktif DPYD menyebabkan penumpukan zat toksik 5-FU yang memicu mielosupresi fatal dan mukositis berat.',
+                variants: [
+                    { rsid: 'rs3918290', change: 'c.1905+1G>A (DPYD Alel 2A)', effect: 'Exon 14 Skiping / Inaktif', risk: 'Toksisitas Fatal' },
+                    { rsid: 'rs55886062', change: 'c.1679T>G (DPYD Alel 13)', effect: 'Inaktivasi Enzim Partial', risk: 'Risiko Tinggi' }
+                ],
+                dosingGuide: 'Pasien heterozigot DPYD wajib menerima pengurangan dosis 5-FU minimal 50%. Untuk homozigot inaktif, penggunaan 5-FU dilarang keras.',
+                chartLabels: ['Aktivitas Normal', 'Defisiensi Parsial', 'Defisiensi Total'],
+                chartData: [100, 50, 0]
+            },
+            {
+                id: 'abacavir',
+                disease: 'Hipersensitivitas Imunologis Abacavir',
+                symbol: 'HLA-B 5701',
+                name: 'Major Histocompatibility Complex, Class I, B',
+                category: 'Infeksi/Sistemik',
+                locus: '6p21.33',
+                inheritance: 'Autosomal Dominan',
+                evidence: 'CPIC Level A',
+                primaryDrug: 'Abacavir (HIV Antiretroviral)',
+                mechanism: 'Abacavir berikatan spesifik pada kantong antigen HLA-B 5701, mengubah pengenalan sel T dan memicu reaksi hipersensitivitas multi-organ yang mematikan.',
+                variants: [
+                    { rsid: 'HLA-B 5701', change: 'Status Positif Alel', effect: 'Perubahan Presentasi Peptida Imun', risk: 'Hipersensitivitas Berat' }
+                ],
+                dosingGuide: 'Skrining HLA-B 5701 wajib dilakukan sebelum terapi. Jika hasil positif, Abacavir KONTRAINDIKASI MUTLAK.',
+                chartLabels: ['HLA-B 5701 Negatif', 'HLA-B 5701 Positif'],
+                chartData: [100, 0]
+            },
+            {
+                id: 'slco1b1',
+                disease: 'Miopati & Rabdomiolisis Simvastatin',
+                symbol: 'SLCO1B1',
+                name: 'Solute Carrier Organic Anion Transporter 1B1',
+                category: 'Metabolik',
+                locus: '12p12.1',
+                inheritance: 'Autosomal Kodominan',
+                evidence: 'CPIC Level A',
+                primaryDrug: 'Simvastatin, Atorvastatin',
+                mechanism: 'SLCO1B1 mengode transporter OATP1B1 pada hati. Varian c.521T>C menghambat masuknya statin ke hati, meningkatkan kadar statin di darah secara drastis.',
+                variants: [
+                    { rsid: 'rs4149056', change: 'c.521T>C (SLCO1B1 Alel 5)', effect: 'Penurunan Transport Hepar', risk: 'Risiko Miopati Otot' }
+                ],
+                dosingGuide: 'Gunakan dosis Simvastatin maksimal 20 mg/hari pada pembawa varian 521C, atau ganti ke Rosuvastatin/Pravastatin.',
+                chartLabels: ['Normal (T/T)', 'Intermediate (T/C)', 'Risiko Tinggi (C/C)'],
+                chartData: [100, 45, 15]
+            }
+        ];
+
+        const moleculeDatabase = {
+            'brca1': { name: 'Olaparib', mw: '434.46 g/mol', logp: '1.9', hbd: '1 / 5',
+                nodes2D: [
+                    {x: -60, y: 0, label: ''}, {x: -30, y: -20, label: 'N', color: '#06b6d4'}, {x: 0, y: 0, label: ''},
+                    {x: 0, y: 40, label: ''}, {x: -30, y: 60, label: 'N', color: '#06b6d4'}, {x: -60, y: 40, label: ''},
+                    {x: -30, y: -60, label: 'O', color: '#f43f5e'}, {x: 40, y: 0, label: ''}, {x: 70, y: -20, label: ''},
+                    {x: 100, y: 0, label: 'F', color: '#10b981'}
+                ],
+                edges2D: [[0,1,1],[1,2,1],[2,3,2],[3,4,1],[4,5,1],[5,0,2],[1,6,2],[2,7,1],[7,8,2],[8,9,1]]
+            },
+            'cftr': { name: 'Ivacaftor', mw: '392.49 g/mol', logp: '5.6', hbd: '2 / 3',
+                nodes2D: [
+                    {x: -70, y: -20, label: ''}, {x: -40, y: -40, label: ''}, {x: 0, y: -20, label: 'NH', color: '#06b6d4'},
+                    {x: 0, y: 20, label: ''}, {x: -40, y: 40, label: ''}, {x: -70, y: 20, label: ''},
+                    {x: 40, y: 40, label: 'O', color: '#f43f5e'}, {x: 70, y: 20, label: ''}, {x: 100, y: 40, label: 'OH', color: '#f43f5e'}
+                ],
+                edges2D: [[0,1,2],[1,2,1],[2,3,1],[3,4,2],[4,5,1],[5,0,1],[3,6,2],[6,7,1],[7,8,1]]
+            },
+            'warfarin': { name: 'Warfarin', mw: '308.33 g/mol', logp: '2.7', hbd: '1 / 4',
+                nodes2D: [
+                    {x: -90, y: -20, label: ''}, {x: -90, y: 30, label: ''}, {x: -50, y: 55, label: ''},
+                    {x: -10, y: 30, label: ''}, {x: -10, y: -20, label: ''}, {x: -50, y: -45, label: ''},
+                    {x: 30, y: -20, label: 'O', color: '#f43f5e'}, {x: 50, y: 20, label: ''}, {x: 20, y: 50, label: ''},
+                    {x: 50, y: -50, label: 'O', color: '#f43f5e'}, {x: 20, y: 80, label: 'OH', color: '#f43f5e'}
+                ],
+                edges2D: [[0,1,2],[1,2,1],[2,3,2],[3,4,1],[4,5,2],[5,0,1],[4,6,1],[6,7,1],[7,8,1],[8,3,1],[7,9,2],[8,10,1]]
+            },
+            'clopidogrel': { name: 'Clopidogrel', mw: '321.82 g/mol', logp: '3.8', hbd: '0 / 3',
+                nodes2D: [
+                    {x: -80, y: 10, label: 'S', color: '#f59e0b'}, {x: -110, y: -25, label: ''}, 
+                    {x: -80, y: -60, label: ''}, {x: -40, y: -45, label: ''}, {x: -40, y: 0, label: ''},
+                    {x: 0, y: -60, label: ''}, {x: 35, y: -45, label: 'N', color: '#06b6d4'}, 
+                    {x: 35, y: 0, label: ''}, {x: 0, y: 15, label: ''}
+                ],
+                edges2D: [[0,1,1],[1,2,2],[2,3,1],[3,4,2],[4,0,1],[3,5,1],[5,6,1],[6,7,1],[7,8,1],[8,4,1]]
+            },
+            'dpyd': { name: '5-Fluorouracil', mw: '130.08 g/mol', logp: '-0.8', hbd: '2 / 3',
+                nodes2D: [
+                    {x: 0, y: -50, label: 'NH', color: '#06b6d4'}, {x: -50, y: -20, label: ''}, 
+                    {x: -50, y: 35, label: 'NH', color: '#06b6d4'}, {x: 0, y: 65, label: ''}, 
+                    {x: 50, y: 35, label: ''}, {x: 50, y: -20, label: ''},
+                    {x: -95, y: -20, label: 'O', color: '#f43f5e'}, {x: 0, y: 110, label: 'O', color: '#f43f5e'},
+                    {x: 95, y: 35, label: 'F', color: '#10b981'}
+                ],
+                edges2D: [[0,1,1],[1,2,1],[2,3,1],[3,4,1],[4,5,2],[5,0,1],[1,6,2],[3,7,2],[4,8,1]]
+            },
+            'abacavir': { name: 'Abacavir', mw: '286.33 g/mol', logp: '1.2', hbd: '3 / 6',
+                nodes2D: [
+                    {x: -40, y: -30, label: 'N', color: '#06b6d4'}, {x: -80, y: -10, label: ''}, 
+                    {x: -80, y: 35, label: 'N', color: '#06b6d4'}, {x: -40, y: 55, label: ''}, 
+                    {x: 0, y: 35, label: ''}, {x: 0, y: -10, label: ''}
+                ],
+                edges2D: [[0,1,1],[1,2,2],[2,3,1],[3,4,2],[4,5,1],[5,0,2]]
+            },
+            'slco1b1': { name: 'Simvastatin', mw: '418.57 g/mol', logp: '4.7', hbd: '1 / 5',
+                nodes2D: [
+                    {x: -80, y: -30, label: ''}, {x: -40, y: -50, label: ''}, {x: 0, y: -30, label: ''},
+                    {x: 0, y: 20, label: ''}, {x: -40, y: 40, label: ''}, {x: -80, y: 20, label: ''}
+                ],
+                edges2D: [[0,1,1],[1,2,2],[2,3,1],[3,4,1],[4,5,2],[5,0,1]]
+            }
+        };
+
+        let selectedCondition = diseaseDatabase[0];
+        let categoryFilter = 'all';
+        let doseChartInstance = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderDiseaseCards();
+            selectCondition(diseaseDatabase[0].id);
+            initMoleculeCanvas();
+        });
+
+        // Toggle Modal Input Penyakit Baru
+        function toggleAddDiseaseModal() {
+            const modal = document.getElementById('addModal');
+            modal.classList.toggle('hidden');
+        }
+
+        // Submit New Disease Inputted by User
+        function submitNewDisease() {
+            const diseaseName = document.getElementById('inpDisease').value.trim();
+            const symbol = document.getElementById('inpSymbol').value.trim();
+            const category = document.getElementById('inpCategory').value;
+            const locus = document.getElementById('inpLocus').value.trim() || 'Lokus Tidak Diatur';
+            const drug = document.getElementById('inpDrug').value.trim() || 'Agen Farmasi Terkait';
+            const mechanism = document.getElementById('inpMechanism').value.trim() || 'Mutasi genetik yang mempengaruhi jalur fisiologis normal.';
+
+            if (!diseaseName || !symbol) {
+                alert('Mohon isi Nama Penyakit dan Simbol Gen Penyebab!');
+                return;
+            }
+
+            const newId = 'custom_' + Date.now();
+            const newEntry = {
+                id: newId,
+                disease: diseaseName,
+                symbol: symbol,
+                name: `Mutasi Gen ${symbol}`,
+                category: category,
+                locus: locus,
+                inheritance: 'Autosomal / Varian Mutasi',
+                evidence: 'Eksperimental / User Input',
+                primaryDrug: drug,
+                mechanism: mechanism,
+                variants: [
+                    { rsid: 'Variant Baru', change: 'Mutasi Varian Kustom', effect: 'Perubahan Aktivitas Proteomik', risk: 'Pathogenic Assessment' }
+                ],
+                dosingGuide: `Disarankan pemantauan ketat untuk terapi ${drug} dan konsultasi konselor genetik.`,
+                chartLabels: ['Tipe Normal', 'Mutasi Heterozigot', 'Mutasi Homozigot'],
+                chartData: [100, 50, 15]
+            };
+
+            diseaseDatabase.unshift(newEntry);
+            
+            // Default simple molecule structure for custom inputs
+            moleculeDatabase[newId] = {
+                name: drug,
+                mw: '350.00 g/mol',
+                logp: '2.5',
+                hbd: '1 / 3',
+                nodes2D: [
+                    {x: -40, y: -20, label: ''}, {x: 0, y: -40, label: 'N', color: '#06b6d4'}, {x: 40, y: -20, label: ''},
+                    {x: 40, y: 20, label: ''}, {x: 0, y: 40, label: 'O', color: '#f43f5e'}, {x: -40, y: 20, label: ''}
+                ],
+                edges2D: [[0,1,1],[1,2,1],[2,3,2],[3,4,1],[4,5,1],[5,0,2]]
+            };
+
+            // Clear inputs
+            document.getElementById('inpDisease').value = '';
+            document.getElementById('inpSymbol').value = '';
+            document.getElementById('inpMechanism').value = '';
+            
+            toggleAddDiseaseModal();
+            renderDiseaseCards();
+            selectCondition(newId);
+        }
+
+        // Render Disease Cards in Left Sidebar
+        function renderDiseaseCards() {
+            const container = document.getElementById('diseaseGrid');
+            const searchVal = (document.getElementById('searchInput')?.value || '').toLowerCase();
+            
+            const filtered = diseaseDatabase.filter(item => {
+                const matchesCat = categoryFilter === 'all' || item.category === categoryFilter;
+                const matchesSearch = item.disease.toLowerCase().includes(searchVal) ||
+                                     item.symbol.toLowerCase().includes(searchVal) || 
+                                     item.name.toLowerCase().includes(searchVal) || 
+                                     item.primaryDrug.toLowerCase().includes(searchVal);
+                return matchesCat && matchesSearch;
+            });
+
+            document.getElementById('diseaseCount').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-panel p-6 rounded-xl text-center text-slate-400 font-mono text-xs border border-dashed border-slate-700">
+                        Penyakit tidak ditemukan. Klik tombol "+ Tambah Input Penyakit Baru" untuk memasukkan penyakit ini!
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => {
+                const isActive = selectedCondition.id === item.id;
+                return `
+                    <div onclick="selectCondition('${item.id}')" 
+                        class="glass-panel p-4 rounded-xl cursor-pointer border hover:border-cyan-400/80 transition duration-200 ${isActive ? 'active-card bg-slate-900/90 border-cyan-400' : 'border-slate-800 hover:bg-slate-900/50'}">
+                        <div class="flex justify-between items-start mb-1.5">
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">${item.category}</span>
+                            <span class="text-[10px] font-mono text-emerald-400">${item.evidence}</span>
+                        </div>
+                        <h4 class="font-display font-bold text-sm text-white tracking-tight">${item.disease}</h4>
+                        <p class="text-xs text-rose-400 font-mono font-semibold mt-1">Gen Penyebab: ${item.symbol}</p>
+                        <div class="mt-2 text-[11px] font-mono text-slate-400 flex items-center justify-between border-t border-slate-800 pt-2">
+                            <span>Lokus: <strong class="text-slate-200">${item.locus}</strong></span>
+                            <span class="text-cyan-400 truncate max-w-[120px]">${item.primaryDrug}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Handle Condition Selection
+        function selectCondition(id) {
+            const found = diseaseDatabase.find(d => d.id === id);
+            if (!found) return;
+
+            selectedCondition = found;
+            renderDiseaseCards();
+
+            // Update UI Fields
+            document.getElementById('detCategory').textContent = found.category;
+            document.getElementById('detSymbol').textContent = found.symbol;
+            document.getElementById('detName').textContent = found.name;
+            document.getElementById('detLocus').textContent = found.locus;
+            document.getElementById('detDisease').textContent = found.disease;
+            document.getElementById('detDrugs').textContent = found.primaryDrug;
+            document.getElementById('detMechanism').textContent = found.mechanism;
+            document.getElementById('detDosingGuide').textContent = found.dosingGuide;
+
+            // Update Molecular Meta Info
+            const molMeta = moleculeDatabase[found.id] || moleculeDatabase['warfarin'];
+            document.getElementById('molMW').textContent = molMeta.mw;
+            document.getElementById('molLogP').textContent = molMeta.logp;
+            document.getElementById('molHBD').textContent = molMeta.hbd;
+            document.getElementById('molTitle').textContent = `Struktur 2D ${molMeta.name}`;
+
+            // Render Variants Table
+            const tbody = document.getElementById('detVariantsTable');
+            tbody.innerHTML = found.variants.map(v => `
+                <tr class="border-b border-medical-border/50 hover:bg-slate-900/50 transition">
+                    <td class="p-2.5 font-bold text-cyan-400">${v.rsid}</td>
+                    <td class="p-2.5 text-slate-300">${v.change}</td>
+                    <td class="p-2.5 text-slate-300">${v.effect}</td>
+                    <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20">${v.risk}</span></td>
+                </tr>
+            `).join('');
+
+            // Render Chart
+            renderDoseChart(found);
+        }
+
+        // Render CPIC Dosing Chart using Chart.js
+        function renderDoseChart(condition) {
+            const ctx = document.getElementById('doseChart').getContext('2d');
+            if (doseChartInstance) {
+                doseChartInstance.destroy();
+            }
+
+            doseChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: condition.chartLabels,
+                    datasets: [{
+                        label: 'Respons Efek Terapi (%)',
+                        data: condition.chartData,
+                        backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'],
+                        borderRadius: 6,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#64748b', font: { family: 'Fira Code', size: 10 } },
+                            grid: { color: '#1f293d' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8', font: { family: 'Fira Code', size: 10 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Filter Handlers
+        function filterDiseases() {
+            renderDiseaseCards();
+        }
+
+        function setCategoryFilter(cat) {
+            categoryFilter = cat;
+            document.querySelectorAll('.cat-pill').forEach(btn => {
+                if(btn.textContent.toLowerCase().includes(cat.toLowerCase()) || (cat === 'all' && btn.textContent === 'Semua')) {
+                    btn.className = 'cat-pill active px-3 py-2 rounded-md bg-medical-accent text-slate-950 font-semibold text-xs transition';
+                } else {
+                    btn.className = 'cat-pill px-3 py-2 rounded-md bg-slate-800 text-slate-300 hover:text-white border border-medical-border text-xs transition';
+                }
+            });
+            renderDiseaseCards();
+        }
+
+        // Molecule Canvas Renderer (2D Skeletal Formula Only)
+        function initMoleculeCanvas() {
+            const canvas = document.getElementById('molCanvas');
+            const ctx = canvas.getContext('2d');
+
+            function draw() {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2;
+                const molData = moleculeDatabase[selectedCondition.id] || moleculeDatabase['warfarin'];
+
+                const nodes = molData.nodes2D || [];
+                const edges = molData.edges2D || [];
+
+                // Render Bonds (Edges)
+                edges.forEach(e => {
+                    const n1 = nodes[e[0]];
+                    const n2 = nodes[e[1]];
+                    const bondType = e[2] || 1; // 1 = Single, 2 = Double bond
+
+                    if(!n1 || !n2) return;
+
+                    const x1 = cx + n1.x * 0.9;
+                    const y1 = cy + n1.y * 0.9;
+                    const x2 = cx + n2.x * 0.9;
+                    const y2 = cy + n2.y * 0.9;
+
+                    ctx.strokeStyle = '#64748b';
+                    ctx.lineWidth = 2;
+
+                    if(bondType === 1) {
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y1);
+                        ctx.lineTo(x2, y2);
+                        ctx.stroke();
+                    } else if(bondType === 2) {
+                        const dx = x2 - x1;
+                        const dy = y2 - y1;
+                        const len = Math.sqrt(dx*dx + dy*dy);
+                        const nx = -dy / len * 3;
+                        const ny = dx / len * 3;
+
+                        ctx.beginPath();
+                        ctx.moveTo(x1 + nx, y1 + ny);
+                        ctx.lineTo(x2 + nx, y2 + ny);
+                        ctx.moveTo(x1 - nx, y1 - ny);
+                        ctx.lineTo(x2 - nx, y2 - ny);
+                        ctx.stroke();
+                    }
+                });
+
+                // Render Atoms (Nodes)
+                nodes.forEach(n => {
+                    const nx = cx + n.x * 0.9;
+                    const ny = cy + n.y * 0.9;
+
+                    if(n.label !== '') {
+                        ctx.fillStyle = '#020617';
+                        ctx.beginPath();
+                        ctx.arc(nx, ny, 11, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.fillStyle = n.color || '#38bdf8';
+                        ctx.font = 'bold 11px Fira Code';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(n.label, nx, ny);
+                    } else {
+                        ctx.fillStyle = '#94a3b8';
+                        ctx.beginPath();
+                        ctx.arc(nx, ny, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        function exportReport() { window.print(); }
+    </script>
+</body>
+</html>
