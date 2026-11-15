@@ -20,6 +20,10 @@ Dokumen ini memuat peta jalan (*roadmap*) dan pembagian tugas bertahap (*step-by
   - [x] **Tugas 2.2: Implementasi Struktur 2D Ivacaftor (Kalydeco)**
   - [x] **Tugas 2.3: Implementasi Struktur 2D Simvastatin**
   - [x] **Tugas 2.4: Implementasi Struktur 2D Abacavir**
+- [x] **Fase 3: Peningkatan UI/UX & Modal Input Kustom** *(Selesai)*
+  - [x] **Tugas 3.1: Template Input Cepat (*Preset Templates*) pada Modal**
+  - [x] **Tugas 3.2: Sistem Notifikasi Toast Interaktif**
+  - [x] **Tugas 3.3: Shortcut Keyboard & Indikator Pencarian Cerdas**
 
 ---
 
@@ -58,17 +62,17 @@ Dokumen ini memuat peta jalan (*roadmap*) dan pembagian tugas bertahap (*step-by
 ## 🎨 Fase 3: Peningkatan UI/UX & Modal Input Kustom
 *Tujuan: Mempermudah pengguna mengisi data klinis baru secara cepat dan akurat.*
 
-- [ ] **Tugas 3.1: Template Input Cepat (*Preset Templates*) pada Modal**
+- [x] **Tugas 3.1: Template Input Cepat (*Preset Templates*) pada Modal** *(Selesai)*
   - Sediakan 3 tombol template pada modal penambahan penyakit untuk memuat data otomatis:
     - *Depresi Mayor / SSRI* (`CYP2D6` / `CYP2C19` - Escitalopram)
     - *Sindrom Stevens-Johnson* (`HLA-B 5801` - Allopurinol)
     - *Toksisitas Mielosupresi* (`UGT1A1` - Irinotecan)
-- [ ] **Tugas 3.2: Sistem Notifikasi Toast Interaktif**
+- [x] **Tugas 3.2: Sistem Notifikasi Toast Interaktif** *(Selesai)*
   - Buat komponen visual *Toast notification* (sukses, peringatan, info) yang muncul saat:
     - Penyakit baru berhasil disimpan.
     - Database diimpor/diekspor.
     - Database direset ke default.
-- [ ] **Tugas 3.3: Shortcut Keyboard & Indikator Pencarian Cerdas**
+- [x] **Tugas 3.3: Shortcut Keyboard & Indikator Pencarian Cerdas** *(Selesai)*
   - Tombol `ESC` untuk mereset kata kunci pencarian.
   - Tombol silang (*clear button*) pada kolom pencarian saat input terisi.
   - *Debounce* input 120ms untuk memastikan transisi filter kartu berjalan mulus.

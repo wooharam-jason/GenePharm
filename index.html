@@ -172,10 +172,13 @@
           id="disease-search-input"
           oninput="handleSearchFilter()"
           placeholder="Cari berdasarkan Nama Penyakit (misal: Kanker Payudara, Resistensi Clopidogrel, Warfarin, Fibrosis)..." 
-          class="w-full pl-11 pr-24 py-3 bg-[#111827] border border-[#1f293d] rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition shadow-inner font-sans"
+          class="w-full pl-11 pr-28 py-3 bg-[#111827] border border-[#1f293d] rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition shadow-inner font-sans"
         />
-        <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1.5 text-xs font-mono text-slate-400 pointer-events-none">
-          <kbd class="px-2 py-0.5 bg-slate-800 rounded border border-slate-700 text-[10px]">Disease-First</kbd>
+        <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1.5">
+          <button id="clear-search-btn" onclick="clearSearchInput()" title="Hapus pencarian (ESC)" class="hidden p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+          <kbd class="px-2 py-0.5 bg-slate-800 rounded border border-slate-700 text-[10px] font-mono text-slate-400 pointer-events-none">ESC</kbd>
         </div>
       </div>
 
@@ -409,6 +412,28 @@
       </div>
 
       <form id="custom-disease-form" onsubmit="handleSaveCustomDisease(event)" class="space-y-4 text-xs">
+        
+        <!-- Quick Preset Templates -->
+        <div class="p-3 bg-[#0d1322] border border-[#1f293d] rounded-xl space-y-2">
+          <div class="flex justify-between items-center text-[11px] text-slate-400 font-mono">
+            <span class="flex items-center gap-1.5 text-cyan-400 font-semibold">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              <span>Preset Cepat (Muat Contoh Acuan CPIC):</span>
+            </span>
+            <span class="text-[10px] text-slate-500">Klik untuk isi otomatis</span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="loadModalPreset('ssri')" class="px-2.5 py-1.5 rounded-lg bg-[#111827] hover:bg-cyan-950/60 text-slate-300 hover:text-cyan-300 border border-[#1f293d] hover:border-cyan-800/60 font-mono text-[11px] transition flex items-center gap-1.5">
+              <span>Depresi Mayor / SSRI (CYP2D6)</span>
+            </button>
+            <button type="button" onclick="loadModalPreset('allopurinol')" class="px-2.5 py-1.5 rounded-lg bg-[#111827] hover:bg-cyan-950/60 text-slate-300 hover:text-cyan-300 border border-[#1f293d] hover:border-cyan-800/60 font-mono text-[11px] transition flex items-center gap-1.5">
+              <span>Sindrom Stevens-Johnson (HLA-B 5801)</span>
+            </button>
+            <button type="button" onclick="loadModalPreset('irinotecan')" class="px-2.5 py-1.5 rounded-lg bg-[#111827] hover:bg-cyan-950/60 text-slate-300 hover:text-cyan-300 border border-[#1f293d] hover:border-cyan-800/60 font-mono text-[11px] transition flex items-center gap-1.5">
+              <span>Toksisitas Irinotecan (UGT1A1)</span>
+            </button>
+          </div>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           <div>
             <label class="block font-medium text-slate-300 mb-1">Nama Penyakit / Kondisi <span class="text-rose-400">*</span></label>
@@ -1620,10 +1645,46 @@
       });
     }
 
-    // 7. SEARCH & CATEGORY FILTER HANDLERS
+    // 7. SEARCH & CATEGORY FILTER HANDLERS (WITH DEBOUNCE & ESC KEY)
+    let searchDebounceTimer = null;
     function handleSearchFilter() {
-      renderDiseaseList();
+      const searchInput = document.getElementById('disease-search-input');
+      const clearBtn = document.getElementById('clear-search-btn');
+      if (clearBtn) {
+        if (searchInput && searchInput.value.trim().length > 0) {
+          clearBtn.classList.remove('hidden');
+        } else {
+          clearBtn.classList.add('hidden');
+        }
+      }
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        renderDiseaseList();
+      }, 120);
     }
+
+    function clearSearchInput() {
+      const searchInput = document.getElementById('disease-search-input');
+      const clearBtn = document.getElementById('clear-search-btn');
+      if (searchInput) {
+        searchInput.value = '';
+        if (clearBtn) clearBtn.classList.add('hidden');
+        renderDiseaseList();
+        searchInput.focus();
+      }
+    }
+
+    // Keyboard shortcut ESC handler
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('custom-disease-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+          closeCustomDiseaseModal();
+          return;
+        }
+        clearSearchInput();
+      }
+    });
 
     function setCategoryFilter(category) {
       activeCategory = category;
@@ -1637,7 +1698,72 @@
       renderDiseaseList();
     }
 
-    // 8. CUSTOM DISEASE INPUT MODAL HANDLERS
+    // 8. CUSTOM DISEASE INPUT MODAL HANDLERS & QUICK PRESETS
+    const MODAL_PRESETS = {
+      ssri: {
+        name: "Gangguan Depresi Mayor & Respons SSRI",
+        category: "Metabolik",
+        geneSymbol: "CYP2D6 / CYP2C19",
+        geneLocus: "22q13.2",
+        drugName: "Escitalopram (Lexapro)",
+        mw: "324.39 g/mol",
+        logp: "3.50",
+        hbd: 0,
+        hba: 3,
+        pathophysiology: "CYP2C19 mengkatalisis N-demetilasi escitalopram menjadi metabolit inaktif. Poor metabolizer (Alel 2/Alel 2) mengalami perpanjangan waktu paruh eliminasi hingga 2 kali lipat, memicu risiko pemanjangan interval QTc jantung dan sindrom serotonin. Sebaliknya, ultrarapid metabolizer (Alel 17/Alel 17) memetabolisme obat terlalu cepat sehingga respon terapeutik antidepresan gagal tercapai.",
+        inheritance: "Autosomal Kodominan",
+        cpicSummary: "Ultra-rapid: ganti obat alternatif (Sertraline / Bupropion). Poor metabolizer: turunkan dosis inisiasi 50% atau ganti obat."
+      },
+      allopurinol: {
+        name: "Sindrom Stevens-Johnson Akibat Allopurinol",
+        category: "Infeksi/Sistemik",
+        geneSymbol: "HLA-B (Alel 5801)",
+        geneLocus: "6p21.33",
+        drugName: "Allopurinol (Zyloprim)",
+        mw: "136.11 g/mol",
+        logp: "-0.55",
+        hbd: 2,
+        hba: 3,
+        pathophysiology: "Metabolit aktif allopurinol (oksipurinol) berikatan secara spesifik pada celah pengikat peptida molekul HLA-B 5801. Pengikatan ini menstimulasi sel T memori CD8+ sitotoksik dan pelepasan granulysin, menyebabkan nekrosis epidermis luas (Toxic Epidermal Necrolysis / TEN) dan reaksi obat berat SCAR dengan mortalitas mencapai 30%.",
+        inheritance: "Kodominan",
+        cpicSummary: "KONTRAINDIKASI MUTLAK pada pasien HLA-B 5801 Positif. Jangan berikan Allopurinol. Rekomendasikan agen urikosurik alternatif seperti Febuxostat atau Probenecid."
+      },
+      irinotecan: {
+        name: "Toksisitas Diare & Mielosupresi Irinotecan",
+        category: "Onkologi",
+        geneSymbol: "UGT1A1",
+        geneLocus: "2q37.1",
+        drugName: "Irinotecan (Camptosar / SN-38)",
+        mw: "586.68 g/mol",
+        logp: "3.32",
+        hbd: 1,
+        hba: 7,
+        pathophysiology: "Irinotecan dihidrolisis menjadi metabolit sitotoksik aktif SN-38 yang 1000 kali lebih poten. SN-38 diinaktivasi melalui glukuronidasi hepatik oleh enzim UGT1A1. Polimorfisme promoter UGT1A1 Alel 28 menurunkan ekspresi enzim hingga 70%, memicu akumulasi SN-38 bebas yang sangat toksik, diare kolinergik hebat derajat 4, dan neutropenia febril yang mengancam jiwa.",
+        inheritance: "Autosomal Kodominan",
+        cpicSummary: "Homozigot UGT1A1 Alel 28/Alel 28: turunkan dosis awal irinotecan minimal 30% jika dosis regimen >250 mg/m². Pertimbangkan pemantauan ANC ketat."
+      }
+    };
+
+    function loadModalPreset(presetKey) {
+      const preset = MODAL_PRESETS[presetKey];
+      if (!preset) return;
+
+      document.getElementById('modal-disease-name').value = preset.name;
+      document.getElementById('modal-disease-category').value = preset.category;
+      document.getElementById('modal-gene-symbol').value = preset.geneSymbol;
+      document.getElementById('modal-gene-locus').value = preset.geneLocus;
+      document.getElementById('modal-drug-name').value = preset.drugName;
+      document.getElementById('modal-mw').value = preset.mw;
+      document.getElementById('modal-logp').value = preset.logp;
+      document.getElementById('modal-hbd').value = preset.hbd;
+      document.getElementById('modal-hba').value = preset.hba;
+      document.getElementById('modal-pathophysiology').value = preset.pathophysiology;
+      document.getElementById('modal-inheritance').value = preset.inheritance;
+      document.getElementById('modal-cpic-summary').value = preset.cpicSummary;
+
+      showToast(`Template preset ${preset.name.split('&')[0].trim()} berhasil dimuat!`, "info");
+    }
+
     function openCustomDiseaseModal() {
       document.getElementById('custom-disease-modal').classList.remove('hidden');
     }
