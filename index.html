@@ -1178,6 +1178,311 @@
         drawBond(pts[0].x, pts[0].y, f5.x, f5.y);
         drawAtom('F', f5.x, f5.y, colors.F);
 
+      } else if (moleculeType === 'olaparib') {
+        // OLAPARIB: Phthalazinone core + Fluorobenzyl + Piperazine-Cyclopropanecarbonyl
+        // 1. Phthalazinone bicyclic core (Benzene ring fused to pyridazinone)
+        const bPts = [];
+        for (let i = 0; i < 6; i++) {
+          const a = (Math.PI / 3) * i - Math.PI / 6;
+          bPts.push({ x: -110 + 26 * Math.cos(a), y: -15 + 26 * Math.sin(a) });
+        }
+        for (let i = 0; i < 6; i++) {
+          drawBond(bPts[i].x, bPts[i].y, bPts[(i+1)%6].x, bPts[(i+1)%6].y, i % 2 === 0);
+        }
+
+        // Pyridazinone fused ring
+        const n1 = { x: -70, y: -38 };
+        const nh2 = { x: -45, y: -25 };
+        const cCarbonyl = { x: -45, y: 0 };
+        const c4 = { x: -70, y: 8 };
+        const oCarbonyl = { x: -25, y: -2 };
+
+        drawBond(bPts[0].x, bPts[0].y, n1.x, n1.y);
+        drawBond(n1.x, n1.y, nh2.x, nh2.y);
+        drawBond(nh2.x, nh2.y, cCarbonyl.x, cCarbonyl.y);
+        drawBond(cCarbonyl.x, cCarbonyl.y, c4.x, c4.y);
+        drawBond(c4.x, c4.y, bPts[1].x, bPts[1].y, true);
+        drawBond(cCarbonyl.x, cCarbonyl.y, oCarbonyl.x, oCarbonyl.y, true);
+
+        drawAtom('N', n1.x, n1.y, colors.N);
+        drawAtom('NH', nh2.x, nh2.y, colors.N);
+        drawAtom('O', oCarbonyl.x, oCarbonyl.y, colors.O);
+
+        // 2. 4-Fluorobenzyl branch at C4
+        const ch2 = { x: -70, y: 32 };
+        drawBond(c4.x, c4.y, ch2.x, ch2.y);
+
+        const fPhPts = [];
+        for (let i = 0; i < 6; i++) {
+          const a = (Math.PI / 3) * i;
+          fPhPts.push({ x: -70 + 20 * Math.cos(a), y: 56 + 20 * Math.sin(a) });
+        }
+        drawBond(ch2.x, ch2.y, fPhPts[3].x, fPhPts[3].y);
+        for (let i = 0; i < 6; i++) {
+          drawBond(fPhPts[i].x, fPhPts[i].y, fPhPts[(i+1)%6].x, fPhPts[(i+1)%6].y, i % 2 === 1);
+        }
+        const fAtom = { x: -70, y: 84 };
+        drawBond(fPhPts[0].x, fPhPts[0].y, fAtom.x, fAtom.y);
+        drawAtom('F', fAtom.x, fAtom.y, colors.F);
+
+        // 3. Carbonyl-Piperazine-Cyclopropyl branch
+        const pipAmideC = { x: -15, y: 22 };
+        const pipAmideO = { x: -15, y: 42 };
+        drawBond(c4.x, c4.y, pipAmideC.x, pipAmideC.y);
+        drawBond(pipAmideC.x, pipAmideC.y, pipAmideO.x, pipAmideO.y, true);
+        drawAtom('O', pipAmideO.x, pipAmideO.y, colors.O);
+
+        // Piperazine 6-membered ring
+        const pipN1 = { x: 8, y: 15 };
+        const pipC1 = { x: 22, y: 30 };
+        const pipC2 = { x: 45, y: 30 };
+        const pipN2 = { x: 55, y: 15 };
+        const pipC3 = { x: 45, y: 0 };
+        const pipC4 = { x: 22, y: 0 };
+
+        drawBond(pipAmideC.x, pipAmideC.y, pipN1.x, pipN1.y);
+        drawBond(pipN1.x, pipN1.y, pipC1.x, pipC1.y);
+        drawBond(pipC1.x, pipC1.y, pipC2.x, pipC2.y);
+        drawBond(pipC2.x, pipC2.y, pipN2.x, pipN2.y);
+        drawBond(pipN2.x, pipN2.y, pipC3.x, pipC3.y);
+        drawBond(pipC3.x, pipC3.y, pipC4.x, pipC4.y);
+        drawBond(pipC4.x, pipC4.y, pipN1.x, pipN1.y);
+        drawAtom('N', pipN1.x, pipN1.y, colors.N);
+        drawAtom('N', pipN2.x, pipN2.y, colors.N);
+
+        // Cyclopropanecarbonyl group
+        const cCycloC = { x: 75, y: 15 };
+        const cCycloO = { x: 75, y: -5 };
+        drawBond(pipN2.x, pipN2.y, cCycloC.x, cCycloC.y);
+        drawBond(cCycloC.x, cCycloC.y, cCycloO.x, cCycloO.y, true);
+        drawAtom('O', cCycloO.x, cCycloO.y, colors.O);
+
+        const cp1 = { x: 95, y: 15 };
+        const cp2 = { x: 110, y: 5 };
+        const cp3 = { x: 110, y: 25 };
+        drawBond(cCycloC.x, cCycloC.y, cp1.x, cp1.y);
+        drawBond(cp1.x, cp1.y, cp2.x, cp2.y);
+        drawBond(cp2.x, cp2.y, cp3.x, cp3.y);
+        drawBond(cp3.x, cp3.y, cp1.x, cp1.y);
+
+      } else if (moleculeType === 'ivacaftor') {
+        // IVACAFTOR: 4-Quinolone core + Carboxamide + 5-tert-butyl-2-hydroxyphenyl
+        // 1. Quinolone bicyclic core (Benzene + 4-pyridone)
+        const qPts = [];
+        for (let i = 0; i < 6; i++) {
+          const a = (Math.PI / 3) * i - Math.PI / 6;
+          qPts.push({ x: -105 + 26 * Math.cos(a), y: 0 + 26 * Math.sin(a) });
+        }
+        for (let i = 0; i < 6; i++) {
+          drawBond(qPts[i].x, qPts[i].y, qPts[(i+1)%6].x, qPts[(i+1)%6].y, i % 2 === 0);
+        }
+
+        const c4 = { x: -65, y: -20 };
+        const c3 = { x: -40, y: -8 };
+        const c2 = { x: -40, y: 18 };
+        const n1 = { x: -65, y: 30 };
+        const oCarbonyl = { x: -65, y: -42 };
+
+        drawBond(qPts[0].x, qPts[0].y, c4.x, c4.y);
+        drawBond(c4.x, c4.y, c3.x, c3.y);
+        drawBond(c3.x, c3.y, c2.x, c2.y, true);
+        drawBond(c2.x, c2.y, n1.x, n1.y);
+        drawBond(n1.x, n1.y, qPts[1].x, qPts[1].y);
+        drawBond(c4.x, c4.y, oCarbonyl.x, oCarbonyl.y, true);
+
+        drawAtom('NH', n1.x, n1.y, colors.N);
+        drawAtom('O', oCarbonyl.x, oCarbonyl.y, colors.O);
+
+        // 2. Carboxamide Linker
+        const amC = { x: -18, y: -20 };
+        const amO = { x: -18, y: -42 };
+        const amNH = { x: 5, y: -8 };
+
+        drawBond(c3.x, c3.y, amC.x, amC.y);
+        drawBond(amC.x, amC.y, amO.x, amO.y, true);
+        drawBond(amC.x, amC.y, amNH.x, amNH.y);
+
+        drawAtom('O', amO.x, amO.y, colors.O);
+        drawAtom('NH', amNH.x, amNH.y, colors.N);
+
+        // 3. 5-tert-butyl-2-hydroxyphenyl ring
+        const phPts = [];
+        for (let i = 0; i < 6; i++) {
+          const a = (Math.PI / 3) * i;
+          phPts.push({ x: 50 + 25 * Math.cos(a), y: 0 + 25 * Math.sin(a) });
+        }
+        drawBond(amNH.x, amNH.y, phPts[3].x, phPts[3].y);
+        for (let i = 0; i < 6; i++) {
+          drawBond(phPts[i].x, phPts[i].y, phPts[(i+1)%6].x, phPts[(i+1)%6].y, i % 2 === 0);
+        }
+
+        // Hydroxyl -OH at ortho
+        const ohPos = { x: 38, y: 32 };
+        drawBond(phPts[2].x, phPts[2].y, ohPos.x, ohPos.y);
+        drawAtom('OH', ohPos.x, ohPos.y, colors.O);
+
+        // tert-butyl group at C5
+        const tbC = { x: 85, y: -10 };
+        drawBond(phPts[5].x, phPts[5].y, tbC.x, tbC.y);
+        const tb1 = { x: 102, y: -24 };
+        const tb2 = { x: 106, y: -5 };
+        const tb3 = { x: 98, y: 15 };
+        drawBond(tbC.x, tbC.y, tb1.x, tb1.y);
+        drawBond(tbC.x, tbC.y, tb2.x, tb2.y);
+        drawBond(tbC.x, tbC.y, tb3.x, tb3.y);
+
+      } else if (moleculeType === 'simvastatin') {
+        // SIMVASTATIN: Hexahydronaphthalene core + 2,2-dimethylbutyrate + Lactone
+        // 1. Decalin bicyclic core (two fused 6-membered rings)
+        const d1 = [];
+        for (let i = 0; i < 6; i++) {
+          const a = (Math.PI / 3) * i;
+          d1.push({ x: -75 + 24 * Math.cos(a), y: 15 + 24 * Math.sin(a) });
+        }
+        for (let i = 0; i < 6; i++) {
+          drawBond(d1[i].x, d1[i].y, d1[(i+1)%6].x, d1[(i+1)%6].y, i === 1);
+        }
+
+        const d2 = [];
+        for (let i = 0; i < 6; i++) {
+          const a = (Math.PI / 3) * i;
+          d2.push({ x: -35 + 24 * Math.cos(a), y: 15 + 24 * Math.sin(a) });
+        }
+        drawBond(d1[0].x, d1[0].y, d2[3].x, d2[3].y);
+        drawBond(d1[1].x, d1[1].y, d2[2].x, d2[2].y);
+        drawBond(d2[3].x, d2[3].y, d2[4].x, d2[4].y, true);
+        drawBond(d2[4].x, d2[4].y, d2[5].x, d2[5].y);
+        drawBond(d2[5].x, d2[5].y, d2[0].x, d2[0].y);
+        drawBond(d2[0].x, d2[0].y, d2[1].x, d2[1].y);
+        drawBond(d2[1].x, d2[1].y, d2[2].x, d2[2].y);
+
+        // Methyl substituents on decalin
+        drawBond(d1[4].x, d1[4].y, d1[4].x - 12, d1[4].y + 16);
+        drawBond(d2[5].x, d2[5].y, d2[5].x + 8, d2[5].y + 18);
+
+        // 2. Ester sidechain (2,2-dimethylbutyrate)
+        const esterO = { x: -85, y: -15 };
+        const esterC = { x: -98, y: -32 };
+        const esterCarbonylO = { x: -118, y: -30 };
+        drawBond(d1[2].x, d1[2].y, esterO.x, esterO.y);
+        drawBond(esterO.x, esterO.y, esterC.x, esterC.y);
+        drawBond(esterC.x, esterC.y, esterCarbonylO.x, esterCarbonylO.y, true);
+        drawAtom('O', esterO.x, esterO.y, colors.O);
+        drawAtom('O', esterCarbonylO.x, esterCarbonylO.y, colors.O);
+
+        const quatC = { x: -92, y: -52 };
+        drawBond(esterC.x, esterC.y, quatC.x, quatC.y);
+        drawBond(quatC.x, quatC.y, quatC.x - 18, quatC.y - 10);
+        drawBond(quatC.x, quatC.y, quatC.x + 16, quatC.y - 12);
+        drawBond(quatC.x, quatC.y, quatC.x - 5, quatC.y - 24);
+        drawBond(quatC.x - 5, quatC.y - 24, quatC.x - 18, quatC.y - 35);
+
+        // 3. Ethylene linker & Lactone Ring
+        const e1 = { x: -15, y: 15 };
+        const e2 = { x: 5, y: 5 };
+        drawBond(d2[0].x, d2[0].y, e1.x, e1.y);
+        drawBond(e1.x, e1.y, e2.x, e2.y);
+
+        // 6-membered lactone ring
+        const lC1 = { x: 22, y: 15 };
+        const lC2 = { x: 42, y: 22 };
+        const lC3 = { x: 65, y: 12 };
+        const lC4 = { x: 72, y: -12 };
+        const lO = { x: 50, y: -25 };
+        const lC5 = { x: 28, y: -12 };
+
+        drawBond(e2.x, e2.y, lC1.x, lC1.y);
+        drawBond(lC1.x, lC1.y, lC2.x, lC2.y);
+        drawBond(lC2.x, lC2.y, lC3.x, lC3.y);
+        drawBond(lC3.x, lC3.y, lC4.x, lC4.y);
+        drawBond(lC4.x, lC4.y, lO.x, lO.y);
+        drawBond(lO.x, lO.y, lC5.x, lC5.y);
+        drawBond(lC5.x, lC5.y, lC1.x, lC1.y);
+
+        // Lactone Carbonyl =O & Hydroxyl -OH
+        const lCarbonylO = { x: 92, y: -18 };
+        drawBond(lC4.x, lC4.y, lCarbonylO.x, lCarbonylO.y, true);
+        const lOH = { x: 45, y: 44 };
+        drawBond(lC2.x, lC2.y, lOH.x, lOH.y);
+
+        drawAtom('O', lO.x, lO.y, colors.O);
+        drawAtom('O', lCarbonylO.x, lCarbonylO.y, colors.O);
+        drawAtom('OH', lOH.x, lOH.y, colors.O);
+
+      } else if (moleculeType === 'abacavir') {
+        // ABACAVIR: Purine core + Cyclopropylamino + Cyclopentenyl carbinol
+        // 1. Pyrimidine 6-membered ring
+        const p1 = { x: -45, y: -25 };
+        const p2 = { x: -22, y: -35 };
+        const p3 = { x: 0, y: -22 };
+        const p4 = { x: 0, y: 8 };
+        const p5 = { x: -22, y: 20 };
+        const p6 = { x: -45, y: 8 };
+
+        drawBond(p1.x, p1.y, p2.x, p2.y);
+        drawBond(p2.x, p2.y, p3.x, p3.y, true);
+        drawBond(p3.x, p3.y, p4.x, p4.y);
+        drawBond(p4.x, p4.y, p5.x, p5.y, true);
+        drawBond(p5.x, p5.y, p6.x, p6.y);
+        drawBond(p6.x, p6.y, p1.x, p1.y, true);
+
+        drawAtom('N', p1.x, p1.y, colors.N);
+        drawAtom('N', p5.x, p5.y, colors.N);
+
+        // Exocyclic amino NH2 at C2
+        const nh2 = { x: -45, y: 32 };
+        drawBond(p6.x, p6.y, nh2.x, nh2.y);
+        drawAtom('NH2', nh2.x, nh2.y, colors.N);
+
+        // 2. Cyclopropylamino at C6
+        const c6nh = { x: 18, y: -35 };
+        drawBond(p3.x, p3.y, c6nh.x, c6nh.y);
+        drawAtom('NH', c6nh.x, c6nh.y, colors.N);
+
+        // Cyclopropane triangle
+        const cp1 = { x: 38, y: -45 };
+        const cp2 = { x: 55, y: -38 };
+        const cp3 = { x: 48, y: -58 };
+        drawBond(c6nh.x, c6nh.y, cp1.x, cp1.y);
+        drawBond(cp1.x, cp1.y, cp2.x, cp2.y);
+        drawBond(cp2.x, cp2.y, cp3.x, cp3.y);
+        drawBond(cp3.x, cp3.y, cp1.x, cp1.y);
+
+        // 3. Fused Imidazole 5-membered ring
+        const imN7 = { x: -12, y: -50 };
+        const imC8 = { x: 10, y: -60 };
+        const imN9 = { x: 18, y: -5 };
+
+        drawBond(p2.x, p2.y, imN7.x, imN7.y);
+        drawBond(imN7.x, imN7.y, imC8.x, imC8.y, true);
+        drawBond(imC8.x, imC8.y, p3.x, p3.y);
+        drawBond(p4.x, p4.y, imN9.x, imN9.y);
+        drawBond(p3.x, p3.y, imN9.x, imN9.y);
+
+        drawAtom('N', imN7.x, imN7.y, colors.N);
+        drawAtom('N', imN9.x, imN9.y, colors.N);
+
+        // 4. Cyclopentenyl Carbinol group from N9
+        const cpC1 = { x: 35, y: 8 };
+        const cpC2 = { x: 58, y: 5 };
+        const cpC3 = { x: 72, y: 25 };
+        const cpC4 = { x: 55, y: 45 };
+        const cpC5 = { x: 32, y: 35 };
+
+        drawBond(imN9.x, imN9.y, cpC1.x, cpC1.y);
+        drawBond(cpC1.x, cpC1.y, cpC2.x, cpC2.y);
+        drawBond(cpC2.x, cpC2.y, cpC3.x, cpC3.y);
+        drawBond(cpC3.x, cpC3.y, cpC4.x, cpC4.y, true);
+        drawBond(cpC4.x, cpC4.y, cpC5.x, cpC5.y);
+        drawBond(cpC5.x, cpC5.y, cpC1.x, cpC1.y);
+
+        // Hydroxymethyl -CH2OH from cyclopentene
+        const ch2oh = { x: 80, y: -10 };
+        const oh = { x: 102, y: -18 };
+        drawBond(cpC2.x, cpC2.y, ch2oh.x, ch2oh.y);
+        drawBond(ch2oh.x, ch2oh.y, oh.x, oh.y);
+        drawAtom('OH', oh.x, oh.y, colors.O);
+
       } else {
         const pts1 = [];
         for (let i = 0; i < 6; i++) {

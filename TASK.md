@@ -15,6 +15,11 @@ Dokumen ini memuat peta jalan (*roadmap*) dan pembagian tugas bertahap (*step-by
   - [x] **Tugas 1.1: Sinkronisasi Otomatis `localStorage`**
   - [x] **Tugas 1.2: Tombol Reset ke Standar Klinis**
   - [x] **Tugas 1.3: Ekspor & Impor Database (JSON Backup)**
+- [x] **Fase 2: Peningkatan Engine Kanvas Struktur Kimia 2D Skeletal** *(Selesai)*
+  - [x] **Tugas 2.1: Implementasi Struktur 2D Olaparib**
+  - [x] **Tugas 2.2: Implementasi Struktur 2D Ivacaftor (Kalydeco)**
+  - [x] **Tugas 2.3: Implementasi Struktur 2D Simvastatin**
+  - [x] **Tugas 2.4: Implementasi Struktur 2D Abacavir**
 
 ---
 
@@ -37,15 +42,15 @@ Dokumen ini memuat peta jalan (*roadmap*) dan pembagian tugas bertahap (*step-by
 ## 🧪 Fase 2: Peningkatan Engine Kanvas Struktur Kimia 2D Skeletal
 *Tujuan: Memberikan visualisasi rumus rangka 2D spesifik khas farmakope untuk seluruh 7 obat bawaan tanpa mengandalkan representasi generik.*
 
-- [ ] **Tugas 2.1: Implementasi Struktur 2D Olaparib**
+- [x] **Tugas 2.1: Implementasi Struktur 2D Olaparib** *(Selesai)*
   - Gambar cincin bisiklik *phthalazinone* dengan substituen fluorobenzyl dan piperazine-cyclopropanecarbonyl.
   - Beri pewarnaan atom hetero: Nitrogen ($N$ cyan), Oksigen ($O$ merah), Fluorin ($F$ hijau).
-- [ ] **Tugas 2.2: Implementasi Struktur 2D Ivacaftor (Kalydeco)**
+- [x] **Tugas 2.2: Implementasi Struktur 2D Ivacaftor (Kalydeco)** *(Selesai)*
   - Gambar kerangka *quinoline-carboxamide* tersubstitusi *tert-butylphenol*.
   - Tampilkan ikatan amida dan gugus hidroksil dengan posisi atom yang tepat.
-- [ ] **Tugas 2.3: Implementasi Struktur 2D Simvastatin**
+- [x] **Tugas 2.3: Implementasi Struktur 2D Simvastatin** *(Selesai)*
   - Gambar sistem cincin heksahidronaftalena (*decalin core*) dengan rantai samping ester *dimethylbutyrate* dan cincin lakton terhidrolisis.
-- [ ] **Tugas 2.4: Implementasi Struktur 2D Abacavir**
+- [x] **Tugas 2.4: Implementasi Struktur 2D Abacavir** *(Selesai)*
   - Gambar cincin purina aminopurin dengan cincin siklopentenil dan substituen siklopropilamino.
 
 ---
