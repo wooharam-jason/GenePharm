@@ -71,7 +71,8 @@
     @media print {
       body {
         background: #ffffff !important;
-        color: #000000 !important;
+        color: #0f172a !important;
+        font-size: 11pt !important;
       }
       .no-print {
         display: none !important;
@@ -84,8 +85,10 @@
         border: 1px solid #cbd5e1 !important;
         color: #0f172a !important;
         box-shadow: none !important;
+        page-break-inside: avoid;
+        margin-bottom: 1.25rem !important;
       }
-      header, #search-filter-section, #left-panel {
+      header, #search-filter-section, #left-panel, #custom-disease-modal, #toast-container {
         display: none !important;
       }
       #right-panel {
@@ -93,10 +96,42 @@
         margin: 0 !important;
         padding: 0 !important;
       }
+      h1, h2, h3, h4, h5, p, span, td, th {
+        color: #0f172a !important;
+      }
+      canvas {
+        max-width: 100% !important;
+        page-break-inside: avoid;
+      }
+      table {
+        page-break-inside: avoid;
+      }
+      .page-break-inside-avoid {
+        page-break-inside: avoid;
+      }
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#090d16] text-slate-100 antialiased custom-scroll">
+
+  <!-- PRINT DOSSIER FORMAL HEADER (Visible ONLY on window.print) -->
+  <div class="print-only hidden p-6 bg-white text-slate-900 border-b-2 border-slate-900 mb-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-900 text-white uppercase">CPIC Level A / PharmGKB</span>
+          <span class="text-xs font-mono text-slate-600">Dokumen Rekomendasi Terapi Genomik</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">GENEPHARM EXPLORER — CLINICAL DOSSIER</h1>
+        <p class="text-xs text-slate-600 mt-0.5">Laporan Deteksi Mutasi Genetik Penyakit & Panduan Preskripsi Dosis Farmakogenomik Presisi</p>
+      </div>
+      <div class="text-right text-xs text-slate-700 font-mono space-y-0.5">
+        <div>Waktu Cetak: <span id="print-date" class="font-bold"></span></div>
+        <div>No. Dokumen: <span class="font-bold">GP-DOS-2026-A1</span></div>
+        <div>Status Validasi: <span class="text-emerald-700 font-bold">VERIFIED BENCHMARK</span></div>
+      </div>
+    </div>
+  </div>
 
   <!-- TOP CLINICAL NAVIGATION HEADER -->
   <header class="no-print sticky top-0 z-40 border-b border-[#1f293d] bg-[#090d16]/95 backdrop-blur-md px-6 py-3.5 flex items-center justify-between">
@@ -390,6 +425,25 @@
         </div>
       </div>
 
+      <!-- 5. FORMAL PRINT CLINICAL SIGN-OFF & DISCLAIMER (Visible ONLY on window.print) -->
+      <div class="print-only hidden mt-8 pt-6 border-t-2 border-slate-300 page-break-inside-avoid">
+        <div class="grid grid-cols-2 gap-8 text-xs font-sans text-slate-800 mb-8">
+          <div>
+            <div class="font-bold text-slate-900 mb-1">Pengkaji / Mahasiswa Klinis:</div>
+            <div class="h-16 border-b border-dashed border-slate-400"></div>
+            <div class="mt-2 text-[11px] text-slate-600">Tanda Tangan & Nama Terang</div>
+          </div>
+          <div>
+            <div class="font-bold text-slate-900 mb-1">Spesialis Farmakogenomik / Apoteker Penanggung Jawab:</div>
+            <div class="h-16 border-b border-dashed border-slate-400"></div>
+            <div class="mt-2 text-[11px] text-slate-600">SIP / Registrasi Profesi Medis</div>
+          </div>
+        </div>
+        <div class="p-3 bg-slate-100 rounded-lg border border-slate-300 text-[10px] text-slate-600 leading-relaxed font-mono">
+          <strong>DISCLAIMER ETIS & KLINIS:</strong> Dossier ini dikompilasi secara otomatis berdasarkan pedoman konsorsium internasional CPIC (Clinical Pharmacogenetics Implementation Consortium) dan basis data PharmGKB. Rekomendasi dosis dan penyesuaian regimen obat harus dikonfirmasi melalui pertimbangan klinis dokter penanggung jawab pelayanan (DPJP) dan therapeutic drug monitoring (TDM) pasien.
+        </div>
+      </div>
+
     </section>
 
   </main>
@@ -507,20 +561,6 @@
         </div>
       </form>
 
-    </div>
-  </div>
-
-  <!-- PRINT DOSSIER HEADER (Appears only on window.print) -->
-  <div class="print-only hidden p-8 bg-white text-slate-900 border-b border-slate-300 mb-6">
-    <div class="flex justify-between items-start">
-      <div>
-        <h1 class="text-2xl font-bold text-slate-900">GENEPHARM EXPLORER — CLINICAL DOSSIER</h1>
-        <p class="text-sm text-slate-600">Laporan Deteksi Gen Mutasi Penyakit & Farmakogenomik Presisi</p>
-      </div>
-      <div class="text-right text-xs text-slate-500 font-mono">
-        <div>Tanggal Cetak: <span id="print-date"></span></div>
-        <div>Standar Konsorsium: CPIC Level A / PharmGKB Guidelines</div>
-      </div>
     </div>
   </div>
 

@@ -24,6 +24,8 @@ Dokumen ini memuat peta jalan (*roadmap*) dan pembagian tugas bertahap (*step-by
   - [x] **Tugas 3.1: Template Input Cepat (*Preset Templates*) pada Modal**
   - [x] **Tugas 3.2: Sistem Notifikasi Toast Interaktif**
   - [x] **Tugas 3.3: Shortcut Keyboard & Indikator Pencarian Cerdas**
+- [x] **Fase 4: Penguatan Format Laporan (*Clinical Dossier Print Engine*)** *(Selesai)*
+  - [x] **Tugas 4.1: Styling Cetak `@media print` A4 Formal**
 
 ---
 
@@ -82,7 +84,7 @@ Dokumen ini memuat peta jalan (*roadmap*) dan pembagian tugas bertahap (*step-by
 ## 📄 Fase 4: Penguatan Format Laporan (*Clinical Dossier Print Engine*)
 *Tujuan: Menjamin hasil cetak A4 memiliki standar rekam medis dan publikasi penelitian yang rapi.*
 
-- [ ] **Tugas 4.1: Styling Cetak `@media print` A4 Formal**
+- [x] **Tugas 4.1: Styling Cetak `@media print` A4 Formal** *(Selesai)*
   - Sembunyikan seluruh tombol navigasi, search bar, dan modal saat mode print aktif.
   - Pastikan grafik respons dosis Chart.js dan kanvas struktur kimia 2D tercetak tajam tanpa terpotong (*page-break-inside: avoid*).
   - Tampilkan kop resmi dossier dengan tanggal real-time dan tanda tangan validasi penelitian.
