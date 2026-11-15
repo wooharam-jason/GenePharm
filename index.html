@@ -119,20 +119,39 @@
     </div>
 
     <!-- Right Controls -->
-    <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap justify-end">
       <div class="hidden lg:flex items-center gap-2 text-xs font-mono text-slate-400 px-3 py-1.5 rounded-lg bg-[#111827] border border-[#1f293d]">
         <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
         <span id="active-database-count">7 Penyakit Terindeks</span>
       </div>
 
-      <button onclick="openCustomDiseaseModal()" class="px-3.5 py-2 text-xs font-medium rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 transition flex items-center gap-1.5 shadow-[0_0_12px_rgba(6,182,212,0.1)]">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-        <span>+ Tambah Input Penyakit Baru</span>
+      <!-- Action: Export JSON -->
+      <button onclick="exportDatabaseJSON()" title="Unduh cadangan database format JSON" class="px-2.5 py-2 text-xs font-medium rounded-lg bg-[#111827] hover:bg-slate-800 text-slate-300 hover:text-cyan-400 border border-[#1f293d] transition flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        <span class="hidden sm:inline">Ekspor .JSON</span>
       </button>
 
-      <button onclick="window.print()" class="px-3.5 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+      <!-- Action: Import JSON -->
+      <label title="Muat database dari file JSON" class="px-2.5 py-2 text-xs font-medium rounded-lg bg-[#111827] hover:bg-slate-800 text-slate-300 hover:text-cyan-400 border border-[#1f293d] transition flex items-center gap-1.5 cursor-pointer">
+        <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        <span class="hidden sm:inline">Impor .JSON</span>
+        <input type="file" id="import-json-input" accept=".json" onchange="importDatabaseJSON(event)" class="hidden">
+      </label>
+
+      <!-- Action: Reset CPIC -->
+      <button onclick="resetToCPICDefaults()" title="Kembalikan database ke 7 penyakit acuan CPIC" class="px-2.5 py-2 text-xs font-medium rounded-lg bg-[#111827] hover:bg-rose-950/40 text-slate-300 hover:text-rose-400 border border-[#1f293d] hover:border-rose-800/60 transition flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span class="hidden sm:inline">Reset CPIC</span>
+      </button>
+
+      <button onclick="openCustomDiseaseModal()" class="px-3 py-2 text-xs font-medium rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 transition flex items-center gap-1.5 shadow-[0_0_12px_rgba(6,182,212,0.1)]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <span>+ Tambah Penyakit</span>
+      </button>
+
+      <button onclick="window.print()" class="px-3 py-2 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-        <span>Cetak Dossier Klinis</span>
+        <span class="hidden sm:inline">Cetak Dossier</span>
       </button>
     </div>
   </header>
@@ -482,9 +501,9 @@
 
   <!-- PHARMACOGENOMIC DATA LOGIC SCRIPT -->
   <script>
-    // 1. MASTER DISEASE & PHARMACOGENOMICS DATASET
+    // 1. MASTER DISEASE & PHARMACOGENOMICS DATASET (DEFAULT 7 CPIC CORE BENCHMARKS)
     // Format rule: Bebas karakter asteris mentah (*) pada alel gen (e.g. CYP2C19 Alel 2)
-    const masterDiseases = [
+    const DEFAULT_CPIC_DISEASES = [
       {
         id: "clopidogrel-resistance",
         name: "Resistensi Antiplatelet Clopidogrel",
@@ -687,10 +706,131 @@
       }
     ];
 
-    // Current State
+    // ==========================================
+    // 2. STATE MANAGEMENT & LOCALSTORAGE PERSISTENCE
+    // ==========================================
+    const STORAGE_KEY = 'genepharm_master_db_v2';
+    let masterDiseases = [];
     let activeDiseaseId = "clopidogrel-resistance";
     let activeCategory = "ALL";
     let cpicChartInstance = null;
+
+    // Inisialisasi Database dengan fallback ke localStorage
+    function initDatabase() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            masterDiseases = parsed;
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Gagal membaca localStorage, memuat default CPIC:', err);
+      }
+      masterDiseases = JSON.parse(JSON.stringify(DEFAULT_CPIC_DISEASES));
+      saveDatabase();
+    }
+
+    // Simpan perubahan ke localStorage
+    function saveDatabase() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(masterDiseases));
+      } catch (err) {
+        console.error('Gagal menyimpan ke localStorage:', err);
+      }
+    }
+
+    // Reset ke 7 Standar Penyakit Acuan CPIC
+    function resetToCPICDefaults() {
+      if (confirm("Apakah Anda yakin ingin mengembalikan seluruh database ke 7 penyakit standar acuan CPIC awal? Data penyakit yang Anda input manual akan direset.")) {
+        masterDiseases = JSON.parse(JSON.stringify(DEFAULT_CPIC_DISEASES));
+        saveDatabase();
+        activeDiseaseId = masterDiseases[0].id;
+        renderDiseaseList();
+        selectDisease(activeDiseaseId);
+        showToast("Database berhasil direset ke 7 standar acuan CPIC!", "info");
+      }
+    }
+
+    // Ekspor Database ke File .JSON
+    function exportDatabaseJSON() {
+      try {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(masterDiseases, null, 2));
+        const downloadAnchor = document.createElement('a');
+        const timestamp = new Date().toISOString().slice(0, 10);
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `GenePharm_Database_${timestamp}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        showToast("Database berhasil diekspor ke file JSON!", "success");
+      } catch (err) {
+        showToast("Gagal mengekspor file JSON: " + err.message, "error");
+      }
+    }
+
+    // Impor Database dari File .JSON
+    function importDatabaseJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported) && imported.length > 0 && imported[0].id && imported[0].name) {
+            masterDiseases = imported;
+            saveDatabase();
+            activeDiseaseId = masterDiseases[0].id;
+            renderDiseaseList();
+            selectDisease(activeDiseaseId);
+            showToast(`Berhasil mengimpor ${imported.length} data penyakit!`, "success");
+          } else {
+            showToast("Format JSON tidak valid atau struktur data tidak sesuai!", "error");
+          }
+        } catch (err) {
+          showToast("File tidak dapat dibaca sebagai JSON yang valid!", "error");
+        }
+        event.target.value = ""; // Reset input file
+      };
+      reader.readAsText(file);
+    }
+
+    // Notifikasi Toast Interaktif
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      
+      let borderCol = 'border-cyan-500/60 bg-[#111827] text-cyan-300';
+      let dotCol = 'bg-cyan-400';
+      if (type === 'success') {
+        borderCol = 'border-emerald-500/60 bg-[#111827] text-emerald-300';
+        dotCol = 'bg-emerald-400';
+      }
+      if (type === 'error') {
+        borderCol = 'border-rose-500/60 bg-[#111827] text-rose-300';
+        dotCol = 'bg-rose-400';
+      }
+
+      toast.className = `px-4 py-3 rounded-xl border shadow-2xl flex items-center gap-2.5 text-xs font-mono pointer-events-auto transition-all duration-300 transform translate-y-4 opacity-0 ${borderCol}`;
+      toast.innerHTML = `
+        <span class="w-2 h-2 rounded-full ${dotCol}"></span>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-4', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
 
     // Helper formatting
     function formatAlleleName(str) {
@@ -698,11 +838,12 @@
       return str.replace(/\*/g, ' Alel ');
     }
 
-    // 2. INITIALIZATION
+    // 3. INITIALIZATION
     window.addEventListener('DOMContentLoaded', () => {
       document.getElementById('print-date').textContent = new Date().toLocaleDateString('id-ID', {
         day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
       });
+      initDatabase();
       renderDiseaseList();
       selectDisease(activeDiseaseId);
     });
@@ -1250,10 +1391,15 @@
       };
 
       masterDiseases.unshift(newEntry);
+      saveDatabase();
       closeCustomDiseaseModal();
       setCategoryFilter('ALL');
       selectDisease(newId);
+      showToast("Penyakit baru berhasil disimpan ke database!", "success");
     }
   </script>
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+
 </body>
 </html>

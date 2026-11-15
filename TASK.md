@@ -11,20 +11,24 @@ Dokumen ini memuat peta jalan (*roadmap*) dan pembagian tugas bertahap (*step-by
   - [x] Dokumentasi dasar pada `README.md`
   - [x] Inisialisasi Git & hubungkan ke GitHub `wooharam-jason/GenePharm`
   - [x] Push commit perdana ke branch `main`
+- [x] **Fase 1: State Management & Data Persistence (`localStorage`)** *(Selesai)*
+  - [x] **Tugas 1.1: Sinkronisasi Otomatis `localStorage`**
+  - [x] **Tugas 1.2: Tombol Reset ke Standar Klinis**
+  - [x] **Tugas 1.3: Ekspor & Impor Database (JSON Backup)**
 
 ---
 
 ## 🚀 Fase 1: State Management & Data Persistence (`localStorage`)
 *Tujuan: Memastikan data penyakit kustom yang ditambahkan oleh pengguna tidak hilang saat halaman di-refresh, serta mendukung pencadangan data.*
 
-- [ ] **Tugas 1.1: Sinkronisasi Otomatis `localStorage`**
+- [x] **Tugas 1.1: Sinkronisasi Otomatis `localStorage`** *(Selesai)*
   - Buat konstanta key storage: `genepharm_master_db_v2`.
   - Buat fungsi `loadDatabase()` yang mengecek `localStorage` terlebih dahulu; jika kosong, inisialisasi dengan `masterDiseases` bawaan.
   - Buat fungsi `saveDatabase()` yang menyimpan array data ke `localStorage` setiap kali ada penambahan atau perubahan data.
-- [ ] **Tugas 1.2: Tombol Reset ke Standar Klinis**
+- [x] **Tugas 1.2: Tombol Reset ke Standar Klinis** *(Selesai)*
   - Sediakan opsi tombol pada UI/header untuk mengembalikan database ke 7 penyakit standar acuan CPIC awal.
   - Tambahkan dialog konfirmasi pengamanan sebelum reset dijalankan.
-- [ ] **Tugas 1.3: Ekspor & Impor Database (JSON Backup)**
+- [x] **Tugas 1.3: Ekspor & Impor Database (JSON Backup)** *(Selesai)*
   - Implementasikan tombol "Ekspor Database (JSON)" untuk mengunduh seluruh data dalam format `.json`.
   - Implementasikan file picker "Impor Database (JSON)" dengan validasi skema data agar pengguna dapat memulihkan database dari file JSON.
 
